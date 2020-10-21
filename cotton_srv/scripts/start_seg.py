@@ -159,16 +159,18 @@ class CottonEstimation:
             
             dep_name = "_depth.png"
             rgb_name = "_color.png"
-            rgb_path = os.path.join(self.image_dir, rgb_name)
+            rgb_path = os.path.join(data_path, rgb_name)
             
             
-            load_data_res = dataset_my.load_data(data_path)
+            load_data_res = dataset_my.load_data()
+            print("Finished load_data")
             if load_data_res:
                 image = cv2.imread(rgb_path)
             else:
                 rospy.logerr("Load data Failed. Check path of the input images.")
                 return False
-            #image = cv2.imread("/home/houjw/cotton/cotton_ws/src/cotton_srv/Dataset/tmp/_color.jpg")
+            print("read ...", rgb_path, flush= True)
+            # image = cv2.imread("/home/houjw/cotton/cotton_ws/src/cotton_srv/Dataset/tmp/_color.png")
             
             mask = segment(image, self.model, raw=True)
             #with self.graph.as_default():

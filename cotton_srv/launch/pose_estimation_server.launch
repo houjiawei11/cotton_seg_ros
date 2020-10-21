@@ -1,13 +1,16 @@
 <launch>
+    <env name="PYTHONPATH"
+         value="/home/administrator/anaconda3/envs/cotton37/lib/python3.7/site-packages:$(optenv PYTHONPATH)"/>
     <node name="pose_estm_srv" pkg="cotton_srv" type="start_seg.py" output="screen">
-        <param name="rgb_topic" value="/head_camera/rgb/image_raw"/>
-        <param name="dep_topic" value="/head_camera/depth_registered/image_raw"/>
-        <param name="camera_optical_frame" value="head_camera_rgb_optical_frame"/>
-        <param name="intrinsics_fx" value="554.257"/>
-        <param name="intrinsics_fy" value="554.255"/>
-        <param name="intrinsics_x0" value="320.5"/>
-        <param name="intrinsics_y0" value="240.5"/>
-        <param name="detect_range" value="180"/>
+        <param name="rgb_topic" value="/repub_color_raw"/>
+        <param name="dep_topic" value="/repub_depth_rect"/>
+        <!-- <param name="rgb_topic" value="/camera/color/image_raw"/> -->
+        <!-- <param name="dep_topic" value="/camera/depth/image_rect_raw"/> -->
+        <param name="camera_optical_frame" value="camera_color_optical_frame"/>
+        <param name="intrinsics_fx" value="604.46"/>
+        <param name="intrinsics_fy" value="604.87"/>
+        <param name="intrinsics_x0" value="315.06"/>
+        <param name="intrinsics_y0" value="243.13"/>
     </node>
 </launch>
 

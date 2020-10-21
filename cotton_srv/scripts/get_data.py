@@ -1,7 +1,11 @@
  #!/usr/bin/env python  
+import os
+import sys
+import datetime
+import time
 import roslib
-import rospy
 import cv2
+import rospy
 import message_filters
 from message_filters import ApproximateTimeSynchronizer, Subscriber
 from std_msgs.msg import String
@@ -12,9 +16,6 @@ from distutils.version import LooseVersion
 import pandas as pd
 import numpy as np
 
-import os
-import sys
-import datetime
 
 input_flag = False
 #width = 640
@@ -32,8 +33,8 @@ class MYDataset:
         self.rgb_name = rgb_name
 
         if rospy.has_param('~rgb_topic') and rospy.has_param('~dep_topic'):
-            dep_topic = rospy.get_param('~dep_topic')
-            rgb_topic = rospy.get_param('~rgb_topic')
+            self.dep_topic = rospy.get_param('~dep_topic')
+            self.rgb_topic = rospy.get_param('~rgb_topic')
         else:
             rospy.logerr("RGBD camera topics not set.")
         
@@ -58,24 +59,29 @@ class MYDataset:
                 return
             img_path = os.path.join(self.image_dir, self.dep_name)
             cv2.imwrite(img_path, NewImg)
-            print("saved ", dep_name)
+            print("saved ", self.dep_name)
         except CvBridgeError as e:
             print(e)
         try:
             NewImgd = self.CvImg.imgmsg_to_cv2(imagec, "bgr8")
-            img_path = os.path.join(self.image_dir, rgb_name)
+            img_path = os.path.join(self.image_dir, self.rgb_name)
             cv2.imwrite(img_path, NewImgd)
-            print("saved ", rgb_name)
+            print("saved ", self.rgb_name)
         except CvBridgeError as e1:
             print(e1)
         input_flag = True
         
     def load_data(self):
         self.CvImg = CvBridge()
-        skDep = message_filters.Subscriber(dep_topic, Image)
-        skImg = message_filters.Subscriber(rgb_topic, Image)
-        ats = message_filters.ApproximateTimeSynchronizer([skDep, skImg], queue_size=5, slop=0.1)
-        ats.registerCallback(self.callback)
+        skDep = message_filters.Subscriber(self.dep_topic, Image)
+        skImg = message_filters.Subscriber(self.rgb_topic, Image)
+        # ats = message_filters.ApproximateTimeSynchronizer(list([skDep, skImg]), queue_size=5, slop=0.1)
+        # ats.registerCallback(self.callback)
+        ts = message_filters.TimeSynchronizer([skDep, skImg], 10)
+        ts.registerCallback(self.callback)
+        # skImg = rospy.Subscriber(self.rgb_topic, Image, self.callbackImg)
+        # rospy.spin()
+
         
         i = 0
         while not input_flag:
