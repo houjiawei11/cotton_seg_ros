@@ -19,6 +19,8 @@ import sys
 from std_srvs.srv import SetBool
 import threading
 import time
+from pose_thread import generate_pose
+from pose_thread import Concur
 
 #import tensorflow as tf
 #from tensorflow.python.keras.backend import set_session
@@ -142,8 +144,8 @@ class CottonEstimation:
         else:
             rospy.logerr("Parameters \'camera_optical_frame\' not set.")
 
-        #self.concur = Concur()
-        #self.first_call = True
+        self.concur = Concur()
+        self.first_call = True
         s = rospy.Service('estimate_pose_cotton', SetBool, self.call_srv)
 
         rospy.loginfo("Estimation initialized.")
@@ -179,6 +181,21 @@ class CottonEstimation:
                 #mask = segment(image, self.model, raw=True)
             
             cv2.imwrite(self.output, mask)
+
+            ##### some program to get RT of a cotton ###
+            RT = np.zeros(( 4, 4))
+            tmp_RT = np.array([[1,0,0,0],[0,1,0,0],[0,0,1,3],[0,0,0,1]])
+            ##############################
+            best_RT = tmp_RT
+            self.concur.set_T(best_RT, self.camera_optical_frame)
+            if self.first_call:
+                self.concur.start()
+                self.first_call = False
+            else:
+                self.concur.resume()
+
+
+
             dataset_my.detect_finished()
         return True
         
