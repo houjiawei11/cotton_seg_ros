@@ -120,7 +120,7 @@ def infer(model, image, regions):
     mask = results[regions]
     return mask
 
-def segment(image, model=None, raw=False):
+def segment(image, raw=False):
     image = cv2.fastNlMeansDenoisingColored(image,None,10,10,7,21)
     if raw:
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -137,6 +137,10 @@ def segment(image, model=None, raw=False):
     # exit()
     mask = infer(model, enhance(image), regions)
     smooth(mask)
+    return mask
+
+def segment_one(image, raw=False):
+    mask = segment(image, raw=raw)
     return mask
 
 # https://stackoverflow.com/questions/50450654/filling-in-circles-in-opencv

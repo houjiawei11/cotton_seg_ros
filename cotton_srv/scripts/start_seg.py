@@ -26,6 +26,42 @@ from pose_thread import Concur
 # model = 'model.p'
 data = 'Dataset/tmp'
 
+# https://github.com/hughw19/NOCS_CVPR2019/blob/utils.py#L3017
+def get_centroid(depth, intrinsics, instance_mask):
+    intrinsics_inv = np.linalg.inv(intrinsics)
+    image_shape = depth.shape
+    width = image_shape[1]
+    height = image_shape[0]
+
+    x = np.arange(width)
+    y = np.arange(height)
+
+    #non_zero_mask = np.logical_and(depth > 0, depth < 5000)
+    non_zero_mask = (depth > 0)
+    final_instance_mask = np.logical_and(instance_mask, non_zero_mask)
+
+    idxs = np.where(final_instance_mask)
+    grid = np.array([idxs[1], idxs[0]])
+
+    # shape: height * width
+    # mesh_grid = np.meshgrid(x, y) #[height, width, 2]
+    # mesh_grid = np.reshape(mesh_grid, [2, -1])
+    length = grid.shape[1]
+    ones = np.ones([1, length])
+    uv_grid = np.concatenate((grid, ones), axis=0) # [3, num_pixel]
+
+    xyz = intrinsics_inv @ uv_grid # [3, num_pixel]
+    xyz = np.transpose(xyz) #[num_pixel, 3]
+
+    z = depth[idxs[0], idxs[1]]
+
+    # print(np.amax(z), np.amin(z))
+    pts = xyz * z[:, np.newaxis]/xyz[:, -1:]
+    pts[:, 0] = -pts[:, 0]
+    pts[:, 1] = -pts[:, 1]
+
+    return pts.mean(axis=0)
+
 
 class CottonEstimation:
     def __init__(self):
@@ -101,13 +137,16 @@ class CottonEstimation:
             print("Finished load_data")
             if load_data_res:
                 image = cv2.imread(rgb_path)
+                depth = cv2.imread(dep_path, 0)
             else:
                 rospy.logerr("Load data Failed. Check path of the input images.")
                 return False
-            print("read ...", rgb_path, flush= True)
+            print("read ...", rgb_path, flush=True)
+            print("read ...", dep_path, flush=True)
+
             # image = cv2.imread("/home/houjw/cotton/cotton_ws/src/cotton_srv/Dataset/tmp/_color.png")
 
-            mask = infseg.segment(image, raw=True)
+            mask = infseg.segment_one(image, raw=True)
             #with self.graph.as_default():
                 #set_session(self.sess)
                 ## star seg
@@ -116,13 +155,18 @@ class CottonEstimation:
             cv2.imwrite(self.output, mask)
 
             ##### some program to get RT of a cotton ###
-            RT = np.zeros(( 4, 4))
-            tmp_RT = np.array([ [1,0,0,0], \
-            					[0,1,0,-0.2], \
-            					[0,0,1,0.5], \
-            					[0,0,0,1]])
-            ##############################
-            best_RT = tmp_RT
+            c = get_centroid(depth, self.intrinsics, mask)
+
+            # RT = np.zeros(( 4, 4))
+            # tmp_RT = np.array([ [1,0,0,0], \
+            #                   [0,1,0,-0.2], \
+            #                   [0,0,1,0.5], \
+            #                   [0,0,0,1]])
+            # best_RT = tmp_RT
+            # ##############################
+            best_RT = np.identity(4)
+            best_RT[0:3, 3] = c
+
             self.concur.set_T(best_RT, self.camera_optical_frame)
             if self.first_call:
                 self.concur.start()
