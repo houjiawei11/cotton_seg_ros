@@ -100,7 +100,7 @@ def parse_args():
     args = parser.parse_args()
     return check_args(args)
 
-def infer(model, image, regions):
+def infer(image, regions):
     rs = regionprops(regions + 1)
     # f, _ = ft.get_features_labels(image, None, train=False, reshape=False)
     results = np.zeros(len(rs), dtype=np.uint8)
@@ -145,7 +145,7 @@ def segment(image, raw=False):
     # plt.imshow(x)
     # imsave('./cot1_out.jpg', x)
     # exit()
-    mask = infer(model, enhance(image), regions)
+    mask = infer(enhance(image), regions)
     smooth(mask)
     return mask
 

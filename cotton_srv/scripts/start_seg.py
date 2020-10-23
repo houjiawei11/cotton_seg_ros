@@ -29,6 +29,7 @@ data = 'Dataset/tmp'
 # https://github.com/hughw19/NOCS_CVPR2019/blob/utils.py#L3017
 def get_centroid(depth, intrinsics, instance_mask):
     intrinsics_inv = np.linalg.inv(intrinsics)
+    print('inv', intrinsics_inv)
     image_shape = depth.shape
     width = image_shape[1]
     height = image_shape[0]
@@ -42,6 +43,7 @@ def get_centroid(depth, intrinsics, instance_mask):
 
     idxs = np.where(final_instance_mask)
     grid = np.array([idxs[1], idxs[0]])
+    print('idxs', idxs) 
 
     # shape: height * width
     # mesh_grid = np.meshgrid(x, y) #[height, width, 2]
@@ -59,6 +61,8 @@ def get_centroid(depth, intrinsics, instance_mask):
     pts = xyz * z[:, np.newaxis]/xyz[:, -1:]
     pts[:, 0] = -pts[:, 0]
     pts[:, 1] = -pts[:, 1]
+
+    print(pts)
 
     return pts.mean(axis=0)
 
@@ -118,6 +122,7 @@ class CottonEstimation:
 
         rospy.loginfo("Estimation initialized.")
 
+
     def start_estimation(self):
         n = 1
         while n > 0:
@@ -151,6 +156,7 @@ class CottonEstimation:
                 #set_session(self.sess)
                 ## star seg
                 #mask = segment(image, self.model, raw=True)
+            
 
             cv2.imwrite(self.output, mask)
 
