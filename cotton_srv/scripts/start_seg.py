@@ -137,7 +137,7 @@ class CottonEstimation:
             print("Finished load_data")
             if load_data_res:
                 image = cv2.imread(rgb_path)
-                depth = cv2.imread(dep_path, 0)
+                depth = cv2.imread(dep_path, -1)
             else:
                 rospy.logerr("Load data Failed. Check path of the input images.")
                 return False
@@ -146,7 +146,7 @@ class CottonEstimation:
 
             # image = cv2.imread("/home/houjw/cotton/cotton_ws/src/cotton_srv/Dataset/tmp/_color.png")
 
-            mask = infseg.segment_one(image, raw=True)
+            mask = infseg.segment_one(image, depth, raw=True)
             #with self.graph.as_default():
                 #set_session(self.sess)
                 ## star seg

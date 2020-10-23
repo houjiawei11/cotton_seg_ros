@@ -18,6 +18,16 @@ INFER_IGN = 100
 RAND_SIZE = 100
 RATIO = 0.7
 
+# https://stackoverflow.com/questions/50450654/filling-in-circles-in-opencv
+def fill(mask):
+    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    cv2.drawContours(mask, contours, -1, 255, thickness=-1)
+
+def get_regions(mask):
+    n, labels = cv2.connectedComponents(mask)
+    regions = regionprops(labels)
+    return [r.coords for r in regions]
+
 def enhance(image):
     im = Image.fromarray(image)
     converter = ImageEnhance.Color(im)
@@ -139,21 +149,36 @@ def segment(image, raw=False):
     smooth(mask)
     return mask
 
-def segment_one(image, raw=False):
+def segment_one(image, depth, raw=False):
+    # mask = np.array([[0,0,0,0,0,0,0,0],
+    # [0,0,0,0,0,0,0,0],
+    # [0,0,255,0,0,0,0,0],
+    # [0,0,255,255,0,0,0,0],
+    # [0,0,255,255,0,0,0,0],
+    # [0,0,0,0,0,255,255,0],
+    # [0,0,0,0,0,0,255,0],
+    # [0,0,0,0,0,0,255,0]],dtype=np.uint8)
+
+    # depth = np.array([[0,0,0,0,0,0,0,0],
+    # [0,0,0,0,0,0,0,0],
+    # [0,0,1,0,0,0,0,0],
+    # [0,0,2,3,0,0,0,0],
+    # [0,0,1,1,0,0,0,0],
+    # [0,0,0,0,0,4,0,0],
+    # [0,0,0,0,0,0,0,0],
+    # [0,0,0,0,0,0,1,0]],dtype=np.uint8)
     mask = segment(image, raw=raw)
-    return mask
-
-# https://stackoverflow.com/questions/50450654/filling-in-circles-in-opencv
-def fill(mask):
-    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-    cv2.drawContours(mask, contours, -1, 255, thickness=-1)
-
-def get_regions(mask):
+    fill(mask)
     n, labels = cv2.connectedComponents(mask)
     regions = regionprops(labels)
-    return [r.coords for r in regions]
+    one = np.array([depth[tuple(r.coords.T)].mean() for r in regions]).argmin()
+    new_mask = np.zeros(mask.shape, dtype=np.uint8)
+    new_mask[tuple(regions[one].coords.T)] = 255
+    return new_mask
 
 if __name__ == '__main__':
+    # print(segment_one())
+    # exit()
     args = parse_args()
     image = args.image
     output = args.output
