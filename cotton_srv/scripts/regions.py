@@ -18,7 +18,7 @@ def reg_nb(X, Y):
     # b = np.trace(X.cov) + np.trace(Y.cov)
     # c = np.sum(np.sqrt(np.linalg.eig(np.dot(X.cov, Y.cov))[0]))
     # return a + b - 2 * c < 200
-    return a < 90
+    return a < 500
 
 def get_graph(regs):
     vs_right = np.vstack([regs[:,:-1].ravel(), regs[:,1:].ravel()])
@@ -35,7 +35,7 @@ def to_regions(img, p=100, raw=False, ig=300):
     if raw:
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     n_seg = img.shape[0] * img.shape[1] // p
-    regs = slic(img, n_segments=n_seg, min_size_factor=0.05)
+    regs = slic(img, n_segments=n_seg, min_size_factor=0.1)
     # return regs
     G = get_graph(regs)
     props = regionprops(regs + 1)
@@ -100,7 +100,8 @@ def get_indices(regs):
 
 if __name__ == '__main__':
     img = cv2.imread(sys.argv[1])
-    # img = cv2.fastNlMeansDenoisingColored(img,None,10,10,7,21)
+    # img = cv2.GaussianBlur(img, (3, 3), 0)
+    img = cv2.fastNlMeansDenoisingColored(img,None,10,10,7,21)
     imr = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     print('start')
     regs = to_regions(imr, 800, raw=True)
@@ -108,6 +109,6 @@ if __name__ == '__main__':
     bb = mark_boundaries(imr, regs)
     # bb = (bb*255).astype(np.uint8)
     # bb = cv2.cvtColor(bb, cv2.COLOR_RGB2BGR)
-    imsave('./x.jpg', bb)
+    imsave('./x.png', bb)
     # plt.imshow(bb)
     # plt.show()

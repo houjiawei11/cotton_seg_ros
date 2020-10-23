@@ -14,11 +14,16 @@ def get_regions(img, p=100):
     return rg.to_regions(img, p)
 
 def subsample_idx(sample_size, label):
-    white = sample_size // 3
-    black = sample_size - white
-    ws = np.random.choice(np.where(label > 0)[0], size=white, replace=False)
-    bs = np.random.choice(np.where(label == 0)[0], size=black, replace=False)
-    return np.hstack((ws, bs))
+    x = np.where(label > 0)[0]
+    y = np.where(label == 0)[0]
+    if len(x) == 0:
+        return np.random.choice(len(label), size=sample_size, replace=False)
+    else:
+        white = sample_size // 4
+        black = sample_size - white
+        ws = np.random.choice(x, size=white, replace=False)
+        bs = np.random.choice(y, size=black, replace=False)
+        return np.hstack((ws, bs))
 
 # def create_binary_pattern(img, p, r):
 #     #print ('[INFO] Computing local binary pattern features.')
