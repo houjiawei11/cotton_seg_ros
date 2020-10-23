@@ -9,7 +9,7 @@ import time
 
 
 def generate_pose(T, camera_optical_frame):
-    print('publish TF for ', T)
+    print('publish TF for \n', T)
     rate = rospy.Rate(3)  # Hz
 
     p = Pose()

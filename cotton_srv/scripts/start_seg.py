@@ -162,6 +162,7 @@ class CottonEstimation:
             dep_name = "_depth.png"
             rgb_name = "_color.png"
             rgb_path = os.path.join(data_path, rgb_name)
+            dep_path = os.path.join(data_path, dep_name)
             
             
             load_data_res = dataset_my.load_data()
@@ -184,7 +185,10 @@ class CottonEstimation:
 
             ##### some program to get RT of a cotton ###
             RT = np.zeros(( 4, 4))
-            tmp_RT = np.array([[1,0,0,0],[0,1,0,0],[0,0,1,3],[0,0,0,1]])
+            tmp_RT = np.array([ [1,0,0,0], \
+            					[0,1,0,-0.2], \
+            					[0,0,1,0.5], \
+            					[0,0,0,1]])
             ##############################
             best_RT = tmp_RT
             self.concur.set_T(best_RT, self.camera_optical_frame)

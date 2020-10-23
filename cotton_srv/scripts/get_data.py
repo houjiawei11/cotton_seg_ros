@@ -59,6 +59,7 @@ class MYDataset:
                 return
             img_path = os.path.join(self.image_dir, self.dep_name)
             cv2.imwrite(img_path, NewImg)
+            print(NewImg.shape)
             print("saved ", self.dep_name)
         except CvBridgeError as e:
             print(e)
