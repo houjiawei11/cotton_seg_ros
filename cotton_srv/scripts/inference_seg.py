@@ -166,15 +166,20 @@ def segment_one(image, depth, raw=False):
     # [0,0,1,1,0,0,0,0],
     # [0,0,0,0,0,4,0,0],
     # [0,0,0,0,0,0,0,0],
-    # [0,0,0,0,0,0,1,0]],dtype=np.uint8)
+    # [0,0,0,0,0,0,1,0]],dtype=np.uint16)
     mask = segment(image, raw=raw)
+    mask = np.bitwise_and(mask, depth > 0) * 255
+    smooth(mask)
     fill(mask)
     n, labels = cv2.connectedComponents(mask)
     regions = regionprops(labels)
-    one = np.array([depth[tuple(r.coords.T)].mean() for r in regions]).argmin()
-    new_mask = np.zeros(mask.shape, dtype=np.uint8)
-    new_mask[tuple(regions[one].coords.T)] = 255
-    return new_mask
+    one = np.array([depth[tuple(r.coords.T)].min() for r in regions])
+    if len(one) > 0:
+        new_mask = np.zeros(mask.shape, dtype=np.uint8)
+        new_mask[tuple(regions[one.argmin()].coords.T)] = 255
+        return (True, new_mask)
+    else:
+        return (False,)
 
 if __name__ == '__main__':
     # print(segment_one())

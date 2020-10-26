@@ -43,7 +43,7 @@ def get_centroid(depth, intrinsics, instance_mask):
 
     idxs = np.where(final_instance_mask)
     grid = np.array([idxs[1], idxs[0]])
-    print('idxs', idxs) 
+    print('idxs', idxs)
 
     # shape: height * width
     # mesh_grid = np.meshgrid(x, y) #[height, width, 2]
@@ -151,12 +151,14 @@ class CottonEstimation:
 
             # image = cv2.imread("/home/houjw/cotton/cotton_ws/src/cotton_srv/Dataset/tmp/_color.png")
 
-            mask = infseg.segment_one(image, depth, raw=True)
+            res = infseg.segment_one(image, depth, raw=True)
+            if not res[0]:
+                return False
+            mask = res[1]
             #with self.graph.as_default():
                 #set_session(self.sess)
                 ## star seg
                 #mask = segment(image, self.model, raw=True)
-            
 
             cv2.imwrite(self.output, mask)
 
