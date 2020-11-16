@@ -3,6 +3,7 @@ import os
 import roslib
 import rospy
 import rospkg
+from sensor_msgs.msg import Image as rosImage
 import cv2
 import numpy as np
 from glob import glob
@@ -19,6 +20,8 @@ import threading
 import time
 from pose_thread import generate_pose
 from pose_thread import Concur
+
+from cv_bridge import CvBridge, CvBridgeError
 
 #import tensorflow as tf
 #from tensorflow.python.keras.backend import set_session
@@ -122,6 +125,9 @@ class CottonEstimation:
 
         rospy.loginfo("Estimation initialized.")
 
+        self.cv_bridge = CvBridge()
+        self.mask_publisher = rospy.Publisher("/cotton_mask", rosImage)
+
 
     def start_estimation(self):
         n = 1
@@ -159,6 +165,11 @@ class CottonEstimation:
                 #set_session(self.sess)
                 ## star seg
                 #mask = segment(image, self.model, raw=True)
+            mask_msg = self.cv_bridge.cv2_to_imgmsg(
+                np.stack([mask, mask, mask], axis= -1),
+                "rgb8",
+            )
+            self.mask_publisher.publish(mask_msg)
 
             cv2.imwrite(self.output, mask)
 
@@ -173,7 +184,9 @@ class CottonEstimation:
             # best_RT = tmp_RT
             # ##############################
             best_RT = np.identity(4)
-            best_RT[0:3, 3] = c
+            c[1] = -c[1] # found axis inversion in rviz
+            c[0] = -c[0] # found axis inversion in rviz
+            best_RT[0:3, 3] = c/1e3 # convert mm to m
 
             self.concur.set_T(best_RT, self.camera_optical_frame)
             if self.first_call:

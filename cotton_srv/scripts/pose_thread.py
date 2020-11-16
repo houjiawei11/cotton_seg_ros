@@ -10,7 +10,7 @@ import time
 
 def generate_pose(T, camera_optical_frame):
     print('publish TF for \n', T)
-    rate = rospy.Rate(3)  # Hz
+    rate = rospy.Rate(30)  # Hz
 
     p = Pose()
     p.position.x = T[0, 3]
@@ -53,7 +53,7 @@ class Concur(threading.Thread):
                 if self.paused:
                     self.state.wait()  # Block execution until notified.
             generate_pose(self.T, self.camera_optical_frame)
-            time.sleep(2.5)
+            # time.sleep(2.5)
 
     def resume(self):
         with self.state:

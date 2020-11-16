@@ -2,10 +2,10 @@
     <env name="PYTHONPATH"
          value="/home/administrator/anaconda3/envs/cotton37/lib/python3.7/site-packages:$(optenv PYTHONPATH)"/>
     <node name="pose_estm_srv" pkg="cotton_srv" type="start_seg.py" output="screen">
-        <param name="rgb_topic" value="/repub_color_raw"/>
-        <param name="dep_topic" value="/repub_depth_rect"/>
-        <!-- <param name="rgb_topic" value="/camera/color/image_raw"/> -->
-        <!-- <param name="dep_topic" value="/camera/aligned_depth_to_color/image_raw"/> -->
+        <!-- <param name="rgb_topic" value="/repub_color_raw"/>
+        <param name="dep_topic" value="/repub_depth_rect"/> -->
+        <param name="rgb_topic" value="/camera/color/image_raw"/>
+        <param name="dep_topic" value="/camera/aligned_depth_to_color/image_raw"/>
         <param name="camera_optical_frame" value="camera_color_optical_frame"/>
         <param name="intrinsics_fx" value="604.46"/>
         <param name="intrinsics_fy" value="604.87"/>
