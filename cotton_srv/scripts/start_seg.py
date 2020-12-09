@@ -11,7 +11,8 @@ import argparse
 import os
 import pickle as pkl
 import time
-import inference_seg as infseg
+import dlcot.test as dltest
+import seg_wrapper as segw
 
 from get_data import MYDataset
 import sys
@@ -27,7 +28,7 @@ from cv_bridge import CvBridge, CvBridgeError
 #from tensorflow.python.keras.backend import set_session
 #from tensorflow.python.keras.models import load_model
 # model = 'model.p'
-data = 'Dataset/tmp'
+MODEL_PATH = 'scripts/model.pth'
 
 # https://github.com/hughw19/NOCS_CVPR2019/blob/utils.py#L3017
 def get_centroid(depth, intrinsics, instance_mask):
@@ -99,7 +100,7 @@ class CottonEstimation:
         self.output = self.save_dir + '/' + 'out.jpg'
 
         # load model
-        # self.model = pkl.load(open(self.model, "rb"))
+        self.model = dltest.load_model(os.path.join(self.pack_path, MODEL_PATH))
 
         # camera parameters
         if rospy.has_param('~intrinsics_fx') and rospy.has_param('~intrinsics_fy') and rospy.has_param(
@@ -148,6 +149,7 @@ class CottonEstimation:
             print("Finished load_data")
             if load_data_res:
                 image = cv2.imread(rgb_path)
+                image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
                 depth = cv2.imread(dep_path, -1)
             else:
                 rospy.logerr("Load data Failed. Check path of the input images.")
@@ -157,7 +159,7 @@ class CottonEstimation:
 
             # image = cv2.imread("/home/houjw/cotton/cotton_ws/src/cotton_srv/Dataset/tmp/_color.png")
 
-            res = infseg.segment_one(image, depth, raw=True)
+            res = segw.segment_one(image, depth, self.model)
             if not res[0]:
                 return False
             mask = res[1]
