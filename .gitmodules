@@ -4,3 +4,6 @@
 [submodule "vision_opencv"]
 	path = vision_opencv
 	url = https://github.com/ros-perception/vision_opencv.git
+[submodule "cotton_srv/scripts/dlcot"]
+	path = cotton_srv/scripts/dlcot
+	url = git@github.com:ichimei/dlcot.git
