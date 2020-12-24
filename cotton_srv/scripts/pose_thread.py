@@ -11,6 +11,19 @@ import time
 def generate_pose(T, camera_optical_frame):
     print('publish TF for \n', T)
     rate = rospy.Rate(30)  # Hz
+    
+    listener = tf.TransformListener()
+    try:
+        t, r = listener.lookupTransform('/base_link', camera_optical_frame, rospy.Time(0))
+    except (tf.LookupException, tf.ConnectivityException, tf.ExtrapolationException):
+        rospy.error("failed to listen transform from '/base_link' to '/camera_optical_frame'")
+        continue
+    cam2base = numpy.matrix(tft.quaternion_matrix(r))
+    cam2base[0,3] = t[0]
+    cam2base[1,3] = t[1]
+    cam2base[2,3] = t[2]
+    
+    T = numpy.array(numpy.dot(cam2base, T))
 
     p = Pose()
     p.position.x = T[0, 3]
@@ -23,8 +36,8 @@ def generate_pose(T, camera_optical_frame):
     p.orientation.y = q[1]
     p.orientation.z = q[2]
     p.orientation.w = q[3]
-
-    tf_brocast(p, camera_optical_frame)
+    #tf_brocast(p, camera_optical_frame)
+    tf_brocast(p, "base_link")
 
 
 def tf_brocast(p, frame_id):
