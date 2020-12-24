@@ -157,6 +157,7 @@ class CottonEstimation:
 
             # image = cv2.imread("/home/houjw/cotton/cotton_ws/src/cotton_srv/Dataset/tmp/_color.png")
 
+            dataset_my.detect_finished()
             res = infseg.segment_one(image, depth, raw=True)
             if not res[0]:
                 return False
@@ -197,7 +198,6 @@ class CottonEstimation:
 
 
 
-            dataset_my.detect_finished()
         return True
 
 
