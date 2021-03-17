@@ -29,6 +29,7 @@ from cv_bridge import CvBridge, CvBridgeError
 #from tensorflow.python.keras.models import load_model
 # model = 'model.p'
 MODEL_PATH = 'scripts/model.pth'
+data = 'Dataset/tmp'
 
 # https://github.com/hughw19/NOCS_CVPR2019/blob/utils.py#L3017
 def get_centroid(depth, intrinsics, instance_mask):
@@ -157,6 +158,7 @@ class CottonEstimation:
             print("read ...", rgb_path, flush=True)
             print("read ...", dep_path, flush=True)
 
+            dataset_my.detect_finished()
             # image = cv2.imread("/home/houjw/cotton/cotton_ws/src/cotton_srv/Dataset/tmp/_color.png")
 
             res = segw.segment_one(image, depth, self.model)
@@ -199,7 +201,6 @@ class CottonEstimation:
 
 
 
-            dataset_my.detect_finished()
         return True
 
 
